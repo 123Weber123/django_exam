@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+在线考试系统
+{% endblock title %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <p class="col-12 mt-4 mb-4">
+            <a>当前科目: {{ subject }}</a>
+            <a>当前考试用户： {{ student.name }}</a>
+            考试时长：
+            <b class="alt-1" id="examTimer"> {{ examtime }} min </b>
+        </p>
+    </div>
+    <div class="container">
+        <form id="examForm" action="/calculateGrade/" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="sid" value="{{ student.sid }}">
+            <input type="hidden" name="subject" value="{{ subject }}">
+            <div class="row">
+                <b class="bi bi-alarm" id="timer" style="color:red"></b>
+                <p>&emsp;</p>
+                <font><input type="submit" name="tijiao" value="交卷"></font>
+            </div>
+            <div class="row">
+                <div class="col-12 mt-4 mb-4">
+                    <h2>单选题</h2>
+                    <p>
+                        <span>共</span><i class="content_lit">{{ count }}</i><span>题，</span>
+                        <span>合计</span><i class="content_fs">{{ score }}</i><span>分</span>
+                    </p>
+                </div>
+            </div>
+        <div class="container">
+                    {% for test in paper %}
+                        <div class="row bg-light">
+                            <div class="col-12">
+                                <div id="{{ forloop.counter }}">
+                                    <b>{{ forloop.counter }}.</b><span>({{ test.score }}分)</span>
+                                    <b>{{ test.title }}</b>
+                                    <ul>
+                                        <li class="option">
+                                            <input type="radio" class="radioOrCheck" name="{{ test.id }}"
+                                                   value="A"/>
+                                            <label>A.
+                                                <p class="ue" style="display: inline;">{{ test.a }}</p>
+                                            </label>
+                                        </li>
+                                        <li class="option">
+                                            <input type="radio" class="radioOrCheck" name="{{ test.id }}"
+                                                   value="B"/>
+                                            <label>
+                                                B.<p class="ue" style="display: inline;">{{ test.b }}</p>
+                                            </label>
+                                        </li>
+                                        <li class="option">
+                                            <input type="radio" class="radioOrCheck" name="{{ test.id }}"
+                                                   value="C"/>
+                                            <label>
+                                                C.<p class="ue" style="display: inline;">{{ test.c }}</p>
+                                            </label>
+                                        </li>
+                                        <li class="option">
+                                            <input type="radio" class="radioOrCheck" name="{{ test.id }}"
+                                                   value="D"/>
+                                            <label>
+                                                D.<p class="ue" style="display: inline;">{{ test.d }}</p>
+                                            </label>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+        </div>
+        </form>
+    </div>
+    <div class="foot"></div>
+</div>
+
+<script>
+    var maxtime = {{ examtime }} * 60;
+    var timer;
+
+    function startCountDown() {
+        timer = setInterval(countDown, 1000);
+    }
+
+    function countDown() {
+        if (maxtime >= 0) {
+            var minutes = Math.floor(maxtime / 60);
+            var seconds = Math.floor(maxtime % 60);
+            var msg = "距离结束还有 " + minutes + " 分 " + seconds + " 秒";
+            document.getElementById('timer').innerHTML = msg;
+            if (maxtime === 5 * 60) {
+                alert("还剩 5 分钟");
+            }
+            maxtime--;
+        } else {
+            clearInterval(timer);
+            alert("时间到，结束!");
+            document.getElementById('examForm').submit(); // 提交表单
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', startCountDown);
+</script>
+
+{% endblock content %}
